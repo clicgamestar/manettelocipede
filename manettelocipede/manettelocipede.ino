@@ -16,9 +16,23 @@
 /* Game values */
 #define DIR_STEPS 1
 #define SPEED_THRESHOLD 5
+/* https://www.arduino.cc/en/Reference/KeyboardModifiers */
+/* Player 1 */
+#define PLAYER_1_LEFT 'q'
+#define PLAYER_1_RIGHT 'd'
+#define PLAYER_1_UP 'z'
+#define PLAYER_1_NITRO KEY_LEFT_CTRL
+#define PLAYER_1_BACK KEY_ESC
+/* Player 2 */
+#define PLAYER_2_LEFT KEY_LEFT_ARROW
+#define PLAYER_2_RIGHT KEY_RIGHT_ARROW
+#define PLAYER_2_UP KEY_UP_ARROW
+#define PLAYER_2_NITRO KEY_RIGHT_CTRL
+#define PLAYER_2_BACK KEY_BACKSPACE
 
 /* Debug */
-#define DEBUG true
+#define DEBUG_ON true
+#define KEYBOARD_ON false
 
 /* Struct Velal */
 struct Velal {
@@ -64,24 +78,66 @@ void setup() {
 }
 
 void loop() {
-  if(DEBUG) {
+  // Velal 1
+  if(DEBUG_ON) {
     Serial.println("Velal 1\n---------");
     debugVelal(velal1);
-    dirVelal(velal1, DIR_STEPS);
-    speedVelal(velal1, SPEED_THRESHOLD);
-    Serial.println("---------\n");
+  }
+  
+  int dirVelal1 = dirVelal(velal1, DIR_STEPS);
+  bool goVelal1 = speedVelal(velal1, SPEED_THRESHOLD);
 
-    Serial.println("Velal 2\n---------");
-    debugVelal(velal2);
-    dirVelal(velal2, DIR_STEPS);
-    speedVelal(velal2, SPEED_THRESHOLD);
+  if(KEYBOARD_ON) {
+    switch(dirVelal1) {
+      case 'l':
+        Keyboard.press(PLAYER_1_LEFT);
+        break;
+      case 'r':
+        Keyboard.press(PLAYER_1_RIGHT);
+        break;
+    }
+
+    if(goVelal1) {
+      Keyboard.press(PLAYER_1_UP);
+    }
+  }
+
+  if(DEBUG_ON) {
     Serial.println("---------\n");
-  } else {
-    dirVelal(velal1, DIR_STEPS);
-    speedVelal(velal1, SPEED_THRESHOLD);
-    
-    dirVelal(velal2, DIR_STEPS);
-    speedVelal(velal2, SPEED_THRESHOLD);
+  }
+
+  
+  // Velal 2
+  if(DEBUG_ON) {
+    Serial.println("Velal 2\n---------");
+    debugVelal(velal1);
+  }
+  
+  int dirVelal2 = dirVelal(velal1, DIR_STEPS);
+  bool goVelal2 = speedVelal(velal1, SPEED_THRESHOLD);
+
+  if(KEYBOARD_ON) {
+    switch(dirVelal2) {
+      case 'l':
+        Keyboard.press(PLAYER_2_LEFT);
+        break;
+      case 'r':
+        Keyboard.press(PLAYER_2_RIGHT);
+        break;
+    }
+
+    if(goVelal2) {
+      Keyboard.press(PLAYER_2_UP);
+    }
+  }
+
+  if(DEBUG_ON) {
+    Serial.println("---------\n");
+  }
+
+  // Release all keys
+  if(KEYBOARD_ON) {
+    Keyboard.releaseAll();
   }
   
   delay(1);
@@ -107,7 +163,7 @@ void initVelal(struct Velal velal, int wheelInput, int handlebarsInput1, int han
   velal.dirCounter = 0;
 }
 
-int dirVelal(struct Velal velal, int steps) {
+char dirVelal(struct Velal velal, int steps) {
   // We want at least a step of 1
   if(steps < 1) {
     steps = 1;
@@ -125,21 +181,21 @@ int dirVelal(struct Velal velal, int steps) {
   velal.oldHandlebarsState = newHandlebarsState;
 
   /* Define dir */
-  /* -1 := left, 0 := straight, 1 := right */
+  /* 'l' := left, 's' := straight, 'r' := right */
   int dir;
   if(velal.dirCounter < -steps) {
-    dir = -1;
+    dir = 'l';
   } else if(velal.dirCounter > steps) {
-    dir = 1;
+    dir = 'r';
   } else {
-    dir = 0;
+    dir = 's';
   }
 
-  if(DEBUG) {
+  if(DEBUG_ON) {
     Serial.print("dirVelal? ");
-    if(dir = -1) {
+    if(dir = 'l') {
       Serial.print("left");
-    } else if(dir = 1) {
+    } else if(dir = 'r') {
       Serial.print("right");
     } else {
       Serial.print("straight");
@@ -176,7 +232,7 @@ bool speedVelal(struct Velal velal, int threshold) {
   }
   speed = speed / SPEED_HISTORY_SIZE;
 
-  if(DEBUG) {
+  if(DEBUG_ON) {
     Serial.print("speedVelal? ");
     Serial.print(speed >= threshold);
     Serial.print(" (speed: ");
