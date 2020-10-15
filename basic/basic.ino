@@ -42,7 +42,7 @@ void gottaGoFast(int wheelInput, int* oldState, int* counter, int threshold, cha
   if(seconds() != time) {
     time = seconds();
     *counter = 0;
-    //Keyboard.release(command);
+    Keyboard.release(command);
   }
   Serial.print("gottaGoFast? ");
   Serial.print(*counter);
@@ -50,7 +50,7 @@ void gottaGoFast(int wheelInput, int* oldState, int* counter, int threshold, cha
   Serial.println(threshold);
 
   if(*counter >= threshold) {
-    //Keyboard.press(command);
+    Keyboard.press(command);
   }
 }
 
@@ -64,39 +64,53 @@ void setup() {
   /* Vélal B */
   pinMode(wheelInputB, INPUT);
   old_wheelStateB = digitalRead(wheelInputB);
+  pinMode(leftInputB, INPUT_PULLUP);
+  pinMode(rightInputB, INPUT_PULLUP);
 
-  //Keyboard.begin();
+  Keyboard.begin();
   
   Serial.begin(9600);
 }
 
 void loop() {
   // Vélal A
-  Serial.println(digitalRead(wheelInputA));
-  Serial.println(digitalRead(leftInputA));
+  Serial.println("*********\nVélal A");
+  Serial.print("wheelInputA: ");
+  Serial.print(digitalRead(wheelInputA));
+  Serial.print("; leftInputA: ");
+  Serial.print(digitalRead(leftInputA));
+  Serial.print("; rightInputA: ");
   Serial.println(digitalRead(rightInputA));
-  Serial.println();
   gottaGoFast(wheelInputA, &old_wheelStateA, &speedCounterA, SPEED_THRESHOLD, PLAYER_1_UP);
 
-  if(digitalRead(leftInputA) == HIGH && digitalRead(rightInputA) == LOW) {
-    //Keyboard.press(PLAYER_1_LEFT);
-  } else if(digitalRead(leftInputA) == LOW && digitalRead(rightInputA) == HIGH) {
-    //Keyboard.press(PLAYER_1_RIGHT);
+  if(digitalRead(leftInputA) == LOW && digitalRead(rightInputA) == HIGH) {
+    Keyboard.press(PLAYER_1_LEFT);
+  } else if(digitalRead(leftInputA) == HIGH && digitalRead(rightInputA) == LOW) {
+    Keyboard.press(PLAYER_1_RIGHT);
   } else {
-    //Keyboard.release(PLAYER_1_LEFT);
-    //Keyboard.release(PLAYER_1_RIGHT);
+    Keyboard.release(PLAYER_1_LEFT);
+    Keyboard.release(PLAYER_1_RIGHT);
   }
+  Serial.println();
 
   // Vélal B
-  //gottaGoFast(wheelInputB, &old_wheelStateB, &speedCounterB, SPEED_THRESHOLD, PLAYER_2_UP);
+  Serial.println("*********\nVélal B");
+  Serial.print("wheelInputB: ");
+  Serial.print(digitalRead(wheelInputB));
+  Serial.print("; leftInputB: ");
+  Serial.print(digitalRead(leftInputB));
+  Serial.print("; rightInputB: ");
+  Serial.println(digitalRead(rightInputB));
+  Serial.println();
+  gottaGoFast(wheelInputB, &old_wheelStateB, &speedCounterB, SPEED_THRESHOLD, PLAYER_2_UP);
 
-  if(digitalRead(leftInputB) == HIGH && digitalRead(rightInputB) == LOW) {
-    //Keyboard.press(PLAYER_2_LEFT);
-  } else if(digitalRead(leftInputB) == LOW && digitalRead(rightInputB) == HIGH) {
-    //Keyboard.press(PLAYER_2_RIGHT);
+  if(digitalRead(leftInputB) == LOW && digitalRead(rightInputB) == HIGH) {
+    Keyboard.press(PLAYER_2_LEFT);
+  } else if(digitalRead(leftInputB) == HIGH && digitalRead(rightInputB) == LOW) {
+    Keyboard.press(PLAYER_2_RIGHT);
   } else {
-    //Keyboard.release(PLAYER_2_LEFT);
-    //Keyboard.release(PLAYER_2_RIGHT);
+    Keyboard.release(PLAYER_2_LEFT);
+    Keyboard.release(PLAYER_2_RIGHT);
   }
   
   delay(1);
