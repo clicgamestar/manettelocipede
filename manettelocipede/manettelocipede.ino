@@ -111,7 +111,7 @@ void loop() {
     Keyboard.releaseAll();
   }
   
-  delay(250);
+  delay(1);
 }
 
 /* Velal handling */
