@@ -52,7 +52,7 @@ struct Velal {
 /* Functions declaration */
 void initVelal(struct Velal *velal, int wheelInput, int handlebarsInput1, int handlebarsInput2);
 char dirVelal(struct Velal velal, int steps);
-bool speedVelal(struct Velal velal, int threshold);
+bool speedVelal(struct Velal *velal, int threshold);
 void debugVelal(struct Velal velal);
 
 /* Clock/time management */
@@ -85,7 +85,7 @@ void loop() {
   }
   
   int dirVelal1 = dirVelal(velal1, DIR_STEPS);
-  bool goVelal1 = speedVelal(velal1, SPEED_THRESHOLD);
+  bool goVelal1 = speedVelal(&velal1, SPEED_THRESHOLD);
 
   if(KEYBOARD_ON) {
     switch(dirVelal1) {
@@ -111,7 +111,7 @@ void loop() {
     Keyboard.releaseAll();
   }
   
-  delay(1);
+  delay(100);
 }
 
 /* Velal handling */
@@ -181,25 +181,25 @@ char dirVelal(struct Velal velal, int steps) {
   return dir;
 }
 
-bool speedVelal(struct Velal velal, int threshold) {
+bool speedVelal(struct Velal *velal, int threshold) {
   // Update speedCounter
-  int newWheelState = digitalRead(velal.wheelInput);
-  if (newWheelState != velal.oldWheelState) {
-    velal.speedCounter = velal.speedCounter + 1;
+  int newWheelState = digitalRead(velal->wheelInput);
+  if (newWheelState != velal->oldWheelState) {
+    velal->speedCounter = velal->speedCounter + 1;
   }
-  velal.oldWheelState = newWheelState;
+  velal->oldWheelState = newWheelState;
 
   // Each second, put the current speedCounter in the speedHistory
   if(seconds() != time) {
     time = seconds();
-    velal.speedHistory[time % SPEED_HISTORY_SIZE] = velal.speedCounter;
-    velal.speedCounter = 0;
+    velal->speedHistory[time % SPEED_HISTORY_SIZE] = velal->speedCounter;
+    velal->speedCounter = 0;
   }
 
   // Mean speed
   int speed;
   for(int i = 0; i < SPEED_HISTORY_SIZE; ++i) {
-    speed += velal.speedHistory[i];
+    speed += velal->speedHistory[i];
   }
   speed = speed / SPEED_HISTORY_SIZE;
 
