@@ -50,8 +50,8 @@ struct Velal {
 };
 
 /* Functions declaration */
-void initVelal(struct Velal velal, int wheelInput, int handlebarsInput1, int handlebarsInput2);
-int dirVelal(struct Velal velal, int steps);
+void initVelal(struct Velal *velal, int wheelInput, int handlebarsInput1, int handlebarsInput2);
+char dirVelal(struct Velal velal, int steps);
 bool speedVelal(struct Velal velal, int threshold);
 void debugVelal(struct Velal velal);
 
@@ -69,8 +69,8 @@ struct Velal velal2;
 void setup() {
   time = 0;
 
-  initVelal(velal1, VELAL_1_PIN_1, VELAL_1_PIN_3, VELAL_1_PIN_4);
-  initVelal(velal2, VELAL_2_PIN_1, VELAL_2_PIN_3, VELAL_2_PIN_4);
+  initVelal(&velal1, VELAL_1_PIN_1, VELAL_1_PIN_3, VELAL_1_PIN_4);
+  initVelal(&velal2, VELAL_2_PIN_1, VELAL_2_PIN_3, VELAL_2_PIN_4);
   
   Keyboard.begin();
   
@@ -106,61 +106,32 @@ void loop() {
     Serial.println("---------\n");
   }
 
-  
-  // Velal 2
-  if(DEBUG_ON) {
-    Serial.println("Velal 2\n---------");
-    debugVelal(velal1);
-  }
-  
-  int dirVelal2 = dirVelal(velal1, DIR_STEPS);
-  bool goVelal2 = speedVelal(velal1, SPEED_THRESHOLD);
-
-  if(KEYBOARD_ON) {
-    switch(dirVelal2) {
-      case 'l':
-        Keyboard.press(PLAYER_2_LEFT);
-        break;
-      case 'r':
-        Keyboard.press(PLAYER_2_RIGHT);
-        break;
-    }
-
-    if(goVelal2) {
-      Keyboard.press(PLAYER_2_UP);
-    }
-  }
-
-  if(DEBUG_ON) {
-    Serial.println("---------\n");
-  }
-
   // Release all keys
   if(KEYBOARD_ON) {
     Keyboard.releaseAll();
   }
   
-  delay(1);
+  delay(250);
 }
 
 /* Velal handling */
-void initVelal(struct Velal velal, int wheelInput, int handlebarsInput1, int handlebarsInput2) {
+void initVelal(struct Velal *velal, int wheelInput, int handlebarsInput1, int handlebarsInput2) {
   // Wheel
-  velal.wheelInput = wheelInput;
-  pinMode(velal.wheelInput, INPUT);
-  velal.oldWheelState = digitalRead(velal.wheelInput);
-  velal.speedCounter = 0;
+  velal->wheelInput = wheelInput;
+  pinMode(velal->wheelInput, INPUT);
+  velal->oldWheelState = digitalRead(velal->wheelInput);
+  velal->speedCounter = 0;
   for(int i = 0; i < SPEED_HISTORY_SIZE; ++i) {
-    velal.speedHistory[i] = 0;
+    velal->speedHistory[i] = 0;
   }
 
   // Handlebars
-  velal.handlebarsInput1 = handlebarsInput1;
-  velal.handlebarsInput2 = handlebarsInput2;
-  pinMode(velal.handlebarsInput1, INPUT);
-  pinMode(velal.handlebarsInput2, INPUT);
-  velal.oldHandlebarsState = digitalRead(velal.handlebarsInput1);
-  velal.dirCounter = 0;
+  velal->handlebarsInput1 = handlebarsInput1;
+  velal->handlebarsInput2 = handlebarsInput2;
+  pinMode(velal->handlebarsInput1, INPUT);
+  pinMode(velal->handlebarsInput2, INPUT);
+  velal->oldHandlebarsState = digitalRead(velal->handlebarsInput1);
+  velal->dirCounter = 0;
 }
 
 char dirVelal(struct Velal velal, int steps) {
@@ -183,9 +154,9 @@ char dirVelal(struct Velal velal, int steps) {
   /* Define dir */
   /* 'l' := left, 's' := straight, 'r' := right */
   int dir;
-  if(velal.dirCounter < -steps) {
+  if(velal.dirCounter <= -steps) {
     dir = 'l';
-  } else if(velal.dirCounter > steps) {
+  } else if(velal.dirCounter >= steps) {
     dir = 'r';
   } else {
     dir = 's';
@@ -193,9 +164,9 @@ char dirVelal(struct Velal velal, int steps) {
 
   if(DEBUG_ON) {
     Serial.print("dirVelal? ");
-    if(dir = 'l') {
+    if(dir == 'l') {
       Serial.print("left");
-    } else if(dir = 'r') {
+    } else if(dir == 'r') {
       Serial.print("right");
     } else {
       Serial.print("straight");
